@@ -1,7 +1,7 @@
 import { readBlockConfig, decorateIcons } from '../../scripts/lib-franklin.js';
 
 // media query match that indicates mobile/tablet width
-const MQ = window.matchMedia('(min-width: 900px)');
+const MQ = window.matchMedia('(min-width: 992px)');
 
 function closeOnEscape(e) {
   if (e.code === 'Escape') {
@@ -111,9 +111,24 @@ export default async function decorate(block) {
       if (section) section.classList.add(`nav-${c}`);
     });
 
+    // build the brand logo and its text
+    const navBrand = nav.querySelector('.nav-brand');
+    const brandText = navBrand.querySelectorAll('p:not(:has(.icon))');
+    const titleWrapper = document.createElement('div');
+    const titles = ['title-section', 'title-location'];
+    [...brandText].forEach((p, i) => {
+      p.className = titles[i];
+    });
+    navBrand.insertBefore(titleWrapper, brandText[0]);
+    titleWrapper.className = 'title-wrapper';
+    titleWrapper.appendChild(brandText[0]);
+    titleWrapper.appendChild(brandText[1]);
+
+    // build the navigation links
     const navSections = nav.querySelector('.nav-sections');
-    if (navSections) {
-      navSections.querySelectorAll(':scope > ul > li').forEach((navSection) => {
+    const hasLinks = navSections && navSections.querySelectorAll(':scope > ul > li');
+    if (hasLinks) {
+      hasLinks.forEach((navSection) => {
         if (navSection.querySelector('ul')) navSection.classList.add('nav-drop');
         navSection.addEventListener('click', () => {
           if (MQ.matches) {
@@ -123,20 +138,21 @@ export default async function decorate(block) {
           }
         });
       });
+
+      // hamburger for mobile
+      const hamburger = document.createElement('div');
+      hamburger.classList.add('nav-hamburger');
+      hamburger.innerHTML = `<button type="button" aria-controls="nav" aria-label="Open navigation">
+          <span class="nav-hamburger-icon"></span>
+        </button>`;
+      hamburger.addEventListener('click', () => toggleMenu(nav, navSections));
+      nav.prepend(hamburger);
+      nav.setAttribute('aria-expanded', 'false');
+      // prevent mobile nav behavior on window resize
+      toggleMenu(nav, navSections, MQ.matches);
+      MQ.addEventListener('change', () => toggleMenu(nav, navSections, MQ.matches));
     }
 
-    // hamburger for mobile
-    const hamburger = document.createElement('div');
-    hamburger.classList.add('nav-hamburger');
-    hamburger.innerHTML = `<button type="button" aria-controls="nav" aria-label="Open navigation">
-        <span class="nav-hamburger-icon"></span>
-      </button>`;
-    hamburger.addEventListener('click', () => toggleMenu(nav, navSections));
-    nav.prepend(hamburger);
-    nav.setAttribute('aria-expanded', 'false');
-    // prevent mobile nav behavior on window resize
-    toggleMenu(nav, navSections, MQ.matches);
-    MQ.addEventListener('change', () => toggleMenu(nav, navSections, MQ.matches));
 
     decorateIcons(nav);
     block.append(nav);
