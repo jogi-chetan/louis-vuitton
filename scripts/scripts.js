@@ -141,53 +141,40 @@ function decorateSectionBackgrounds(main) {
   });
 }
 
-function decorateHyperlinkImages(container) {
-  // picture + br + a in the same paragraph
-  [...container.querySelectorAll('picture + br + a')]
-  // link text is an unformatted URL paste, and matches the link href
-    .filter((a) => {
-      try {
-        // ignore domain in comparison
-        return new URL(a.href).pathname === new URL(a.textContent).pathname;
-      } catch (e) {
-        return false;
-      }
-    })
-    .forEach((a) => {
-      const picture = a.previousElementSibling.previousElementSibling;
-      picture.remove();
-      const br = a.previousElementSibling;
-      br.remove();
-      a.innerHTML = picture.outerHTML;
-      // make sure the link is not decorated as a button
-      a.parentNode.classList.remove('button-container');
+export function linkPicture(picture) {
+  const nextSib = picture.parentNode.nextElementSibling;
+  if (nextSib) {
+    const a = nextSib.querySelector('a');
+    if (a && a.textContent.startsWith('https://')) {
+      a.innerHTML = '';
       a.className = '';
-    });
+      a.appendChild(picture);
+    }
+  }
+}
 
-  // with link and image in separate paragraphs
-  [...container.querySelectorAll('p > a[href]')]
-    // link (in a <p>) has no siblings
-    .filter((a) => a.parentNode.childElementCount === 1)
-    // is preceded by an image (in a <p>) and image has no other siblings
-    .filter((a) => a.parentNode.previousElementSibling?.firstElementChild?.tagName === 'PICTURE')
-    .filter((a) => a.parentNode.previousElementSibling?.childElementCount === 1)
-    // link text is an unformatted URL pastes and matches the link href
-    .filter((a) => {
-      try {
-        // ignore domain in comparison
-        return new URL(a.href).pathname === new URL(a.textContent)?.pathname;
-      } catch (e) {
-        return false;
-      }
-    })
-    .forEach((a) => {
-      const picture = a.parentNode.previousElementSibling.firstElementChild;
-      picture.parentNode.remove();
-      a.innerHTML = picture.outerHTML;
-      // make sure the link is not decorated as a button
-      a.parentNode.classList.remove('button-container');
+/**
+ * word online does not support linked images, see
+ * https://www.hlx.live/developer/block-collection/links */
+export function decorateLinkedPictures(container) {
+  //  link and image in separate paragraphs
+  container.querySelectorAll('picture').forEach((picture) => {
+    if (!picture.closest('div.block')) {
+      linkPicture(picture);
+    }
+  });
+
+  // picture + br + a in the same paragraph
+  [...container.querySelectorAll('picture + br + a')].forEach((a) => {
+    if (a && a.textContent.startsWith('https://')) {
+      a.innerHTML = '';
       a.className = '';
-    });
+      const picture = a.previousElementSibling.previousElementSibling;
+      const br = a.previousElementSibling;
+      a.appendChild(picture);
+      br.remove();
+    }
+  });
 }
 
 function addDefaultVideoLinkBehaviour(main) {
@@ -210,7 +197,7 @@ export function decorateMain(main, head) {
   buildAutoBlocks(main, head);
   decorateSections(main);
   decorateBlocks(main);
-  decorateHyperlinkImages(main);
+  decorateLinkedPictures(main);
   decorateSectionBackgrounds(main);
   addDefaultVideoLinkBehaviour(main);
   buildTabbedBlock(main);
