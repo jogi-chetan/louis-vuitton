@@ -3,13 +3,17 @@
   "private": true,
   "version": "1.0.0",
   "description": "Starter project for Adobe Helix",
+  "type": "module",
   "scripts": {
     "dev": "npx @adobe/helix-cli up",
     "test": "wtr \"./test/**/*.test.js\" --node-resolve --port=2000 --coverage",
     "test:watch": "npm test -- --watch",
     "lint:js": "eslint .",
     "lint:css": "stylelint 'blocks/**/*.css' 'styles/*.css' 'templates/**/*.css'",
-    "lint": "npm run lint:js && npm run lint:css"
+    "lint": "npm run lint:js && npm run lint:css",
+    "up": "npm run compile & hlx up",
+    "compile": "node sass-compile.js"
+
   },
   "repository": {
     "type": "git",
@@ -31,6 +35,7 @@
     "@esm-bundle/chai": "4.3.4-fix.0",
     "@web/test-runner": "0.15.0",
     "@web/test-runner-commands": "0.6.5",
+    "sass": "^1.59.3",
     "sinon": "15.0.1",
     "stylelint": "14.16.1",
     "stylelint-config-prettier": "9.0.4",

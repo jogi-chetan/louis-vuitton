@@ -17,6 +17,14 @@ npm i
 npm tst
 ```
 
+## Run sass auto-compile and Helix Pages
+
+```sh
+npm run up
+```
+
+The above command will run `node sass-compile.js` in parallel with `hlx up` which will start your local Helix Pages development environment.
+
 ## Local development
 
 1. Create a new repository based on the `helix-project-boilerplate` template and add a mountpoint in the `fstab.yaml`
